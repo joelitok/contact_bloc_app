@@ -27,7 +27,8 @@ BlocProvider(create: (context)=>ContactsBloc(
     
 contacts: [],errorMessage: '',
   requestState: RequestState.NONE),
-contactsRepository: GetIt.instance<ContactsRepository>()                      // new ContactsRepository() 
+contactsRepository: GetIt.instance<ContactsRepository>()                      
+// new ContactsRepository() 
 
   ),),
   BlocProvider(create: (context)=>MessageBloc(

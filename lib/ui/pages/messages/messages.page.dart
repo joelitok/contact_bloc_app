@@ -3,6 +3,10 @@ import 'package:contacts_blog_app/bloc/messages/message.state.dart';
 import 'package:contacts_blog_app/bloc/messages/messages.bloc.dart';
 import 'package:contacts_blog_app/enums/enums.dart';
 import 'package:contacts_blog_app/model/contact.model.dart';
+import 'package:contacts_blog_app/ui/pages/messages/widgets/contact.info.widgets.dart';
+import 'package:contacts_blog_app/ui/pages/messages/widgets/message.form.widget.dart';
+import 'package:contacts_blog_app/ui/pages/messages/widgets/messages.list.widget.dart';
+import 'package:contacts_blog_app/ui/pages/shared/circular.progress.ind.widget.dart';
 import 'package:contacts_blog_app/ui/pages/shared/error.retry.action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,18 +17,37 @@ class MessagesPage extends StatelessWidget {
     this.contact=ModalRoute.of(context).settings.arguments;
     context.read<MessageBloc>().add(MessageByContactEvent(this.contact));
     return Scaffold(
-appBar: AppBar(title: Text('Messages'),),
+appBar: AppBar(
+  title: Text('Messages de ${contact.name}'),
+actions: [
+  BlocBuilder<MessageBloc,MessagesState>(
+    builder:(context,state){
+      return CircleAvatar(child:  Text('${state.messages.length}'),);
+    } ,
+  
+  ),
+
+  BlocBuilder<MessageBloc,MessagesState>(
+    builder:(context,state){
+      if(state.selectedMessages.length>0){
+      return IconButton(icon: Icon(Icons.restore_from_trash), onPressed: (){
+      context.read<MessageBloc>().add(new DeleteMessageEvent());
+    });
+    }else {
+      return Container();
+    }
+    } ,
+  
+  )
+],
+
+
+
+),
 body: Column(
   children: [
-  Container(
-    padding: EdgeInsets.all(16),
-    child: Row(
-      children: [
-      CircleAvatar(child: Text('${contact.profile}'),),
-      SizedBox(width: 10,),
-      Text('${contact.name}')
-    ],),
-  ),
+ ContactInfoWidget(contact),
+
 Expanded(
   child:   BlocBuilder<MessageBloc, MessagesState>(
   
@@ -32,7 +55,7 @@ Expanded(
   
       if(state.requestState==RequestState.LOADING){
   
-        return Center(child: CircularProgressIndicator(),);
+        return MyCircularProgressIndWidget();
   
       }else if(state.requestState==RequestState.ERROR){
   
@@ -44,25 +67,9 @@ Expanded(
   
       }else if (state.requestState==RequestState.LOADED){
   
-  return 
+  return  MessagesListWidget(state.messages);
   
-   ListView.separated(
-  
-    itemBuilder: (context, index)=>ListTile(
-  
-      title: Row(
-  
-        children: [
-  
-          Text('${state.messages[index].content}')
-  
-        ],
-  
-      ),
-  
-    ), 
-   separatorBuilder: (context,index)=>Divider(color: Colors.deepOrange,height: 2,),
-   itemCount: state.messages.length);
+
   
    
   
@@ -81,12 +88,7 @@ Expanded(
   ),
 ),
 
-Container(
-  padding: EdgeInsets.all(10),
-  alignment: Alignment.bottomLeft,
-  child: Text('Message form'),
-
-)
+MessagesFormWidget(contact)
 
 
  ],)

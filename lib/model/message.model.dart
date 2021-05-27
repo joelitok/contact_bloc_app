@@ -4,7 +4,8 @@ int contactID;
 DateTime date;
 String content;
 String type;
-Message({this.id,this.contactID,this.date,this.content,this.type});
+bool selected=false;
+Message({this.id,this.contactID,this.date,this.content,this.type,this.selected});
 
 
 }

@@ -18,13 +18,13 @@ class MessageBloc extends Bloc<MessageEvent,MessagesState>{
   Stream<MessagesState> mapEventToState(MessageEvent event)  async*{
 if(event is MessageByContactEvent){
 
-yield MessagesState(requestState : RequestState.LOADING,messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages);
+yield MessagesState(requestState : RequestState.LOADING,messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages,currentContact: event.payload);
 
 try{
 List<Message> data = await messagesRepository.messageByContact(event.payload.id);
-yield MessagesState(requestState: RequestState.LOADED, messages: data, currentMessageEvent: event,selectedMessages: state.selectedMessages);
+yield MessagesState(requestState: RequestState.LOADED, messages: data, currentMessageEvent: event,selectedMessages: state.selectedMessages,currentContact: event.payload);
 } catch (e){
-  yield MessagesState(requestState: RequestState.ERROR,messageError: e.toString(),messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages);
+  yield MessagesState(requestState: RequestState.ERROR,messageError: e.toString(),messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages, currentContact: event.payload);
 }
 
 
@@ -38,9 +38,9 @@ event.payload.date = DateTime.now();
 Message message = await messagesRepository.AddNewMessage(event.payload);
 List<Message> data = [...state.messages];
 data.add(message);
-yield MessagesState(requestState: RequestState.LOADED, messages: data, currentMessageEvent: event,selectedMessages: state.selectedMessages);
+yield MessagesState(requestState: RequestState.LOADED, messages: data, currentMessageEvent: event,selectedMessages: state.selectedMessages,currentContact: state.currentContact);
 } catch (e){
-yield MessagesState(requestState: RequestState.ERROR,messageError: e.toString(),messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages);
+yield MessagesState(requestState: RequestState.ERROR,messageError: e.toString(),messages: state.messages,currentMessageEvent: event,selectedMessages: state.selectedMessages,currentContact: state.currentContact);
 }
 
 
@@ -59,7 +59,7 @@ for(Message m in messages){
   }
 } 
   
-  MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.LOADED);
+  MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.LOADED,currentContact: state.currentContact);
 yield messagesState;
 
 }else if(event is DeleteMessageEvent){
@@ -70,10 +70,10 @@ for(Message m in selected){
   try {
     await messagesRepository.deleteMessage(m);
     messages.removeWhere((element) => element.id==m.id);
-     MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.LOADED);
+     MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.LOADED,currentContact: state.currentContact);
     yield messagesState;
   } catch (e) {
-    MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.ERROR);
+    MessagesState messagesState =MessagesState(messages: messages,selectedMessages: selected,currentMessageEvent: event,requestState: RequestState.ERROR,currentContact: state.currentContact);
     yield messagesState;
   }
 } 

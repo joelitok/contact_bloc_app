@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:contacts_blog_app/bloc/contact.action.dart';
 import 'package:contacts_blog_app/bloc/contact.state.dart';
+import 'package:contacts_blog_app/bloc/messages/message.action.dart';
+import 'package:contacts_blog_app/bloc/messages/messages.bloc.dart';
 import 'package:contacts_blog_app/enums/enums.dart';
 import 'package:contacts_blog_app/model/contact.model.dart';
 import 'package:contacts_blog_app/repositories/contact.repo.dart';
@@ -13,8 +15,9 @@ import 'package:flutter/cupertino.dart';
 class ContactsBloc extends Bloc <ContactsEvent, ContactsState>{
   
 ContactsRepository contactsRepository;
+MessageBloc messageBloc;
 
-  ContactsBloc({ContactsState initialState, this.contactsRepository}) : super(initialState);
+  ContactsBloc({ContactsState initialState, this.contactsRepository,this.messageBloc}) : super(initialState);
 
 
   @override
@@ -27,7 +30,10 @@ yield ContactsState(contacts: state.contacts, requestState: RequestState.LOADING
 
 try {
   List<Contact> data = await contactsRepository.allcontact();
-  yield ContactsState(contacts: data, requestState: RequestState.LOADED, currentEvent: event);
+  yield ContactsState(contacts: data, requestState: RequestState.LOADED, currentEvent: event,currentContact: data[0]);
+
+  messageBloc.add(new MessageByContactEvent(data[0]));
+
 
 }catch (e) {
 
